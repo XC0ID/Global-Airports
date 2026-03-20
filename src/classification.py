@@ -22,11 +22,6 @@ from sklearn.model_selection import cross_val_score, GridSearchCV
 import warnings
 warnings.filterwarnings("ignore")
 
-
-# ──────────────────────────────────────────────
-# 1. TRAIN RANDOM FOREST
-# ──────────────────────────────────────────────
-
 def train_random_forest(X_train: np.ndarray,
                         y_train: np.ndarray,
                         n_estimators: int = 200,
@@ -51,10 +46,6 @@ def train_random_forest(X_train: np.ndarray,
     return model
 
 
-# ──────────────────────────────────────────────
-# 2. TRAIN GRADIENT BOOSTING
-# ──────────────────────────────────────────────
-
 def train_gradient_boosting(X_train: np.ndarray,
                              y_train: np.ndarray,
                              n_estimators: int = 150,
@@ -71,10 +62,6 @@ def train_gradient_boosting(X_train: np.ndarray,
     print(f"[✔] Gradient Boosting trained  |  Estimators: {n_estimators}  |  LR: {learning_rate}")
     return model
 
-
-# ──────────────────────────────────────────────
-# 3. COMPARE MULTIPLE MODELS
-# ──────────────────────────────────────────────
 
 def compare_models(X_train: np.ndarray,
                    y_train: np.ndarray,
@@ -102,10 +89,6 @@ def compare_models(X_train: np.ndarray,
     print(f"\n[✔] Best model: {best}  ({results[best]['mean']:.4f})")
     return results
 
-
-# ──────────────────────────────────────────────
-# 4. EVALUATE MODEL
-# ──────────────────────────────────────────────
 
 def evaluate_model(model,
                    X_test: np.ndarray,
@@ -143,10 +126,6 @@ def evaluate_model(model,
     return {"accuracy": acc, "report": report}
 
 
-# ──────────────────────────────────────────────
-# 5. FEATURE IMPORTANCE
-# ──────────────────────────────────────────────
-
 def plot_feature_importance(model,
                              feature_names: list,
                              top_n: int = 10,
@@ -174,10 +153,6 @@ def plot_feature_importance(model,
     print(f"[✔] Feature importance plot done.")
 
 
-# ──────────────────────────────────────────────
-# 6. HYPERPARAMETER TUNING
-# ──────────────────────────────────────────────
-
 def tune_random_forest(X_train: np.ndarray,
                        y_train: np.ndarray,
                        cv: int = 3) -> RandomForestClassifier:
@@ -196,10 +171,6 @@ def tune_random_forest(X_train: np.ndarray,
     return gs.best_estimator_
 
 
-# ──────────────────────────────────────────────
-# 7. SAVE / LOAD MODEL
-# ──────────────────────────────────────────────
-
 def save_model(model, filepath: str = "models/airport_classifier.pkl") -> None:
     """Persist a trained model to disk using joblib."""
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -215,10 +186,6 @@ def load_model(filepath: str = "models/airport_classifier.pkl"):
     print(f"[✔] Model loaded ← {filepath}")
     return model
 
-
-# ──────────────────────────────────────────────
-# 8. PREDICT NEW AIRPORTS
-# ──────────────────────────────────────────────
 
 def predict_airport(model,
                     scaler,
@@ -244,10 +211,6 @@ def predict_airport(model,
     return pred_label
 
 
-# ──────────────────────────────────────────────
-# 9. FULL CLASSIFICATION PIPELINE
-# ──────────────────────────────────────────────
-
 def run_classification_pipeline(df: pd.DataFrame) -> dict:
     """
     End-to-end classification pipeline:
@@ -260,23 +223,17 @@ def run_classification_pipeline(df: pd.DataFrame) -> dict:
 
     print("\n══════════ CLASSIFICATION PIPELINE ══════════")
 
-    # Prepare data
     X_train, X_test, y_train, y_test, scaler, le = prepare_classification_data(df)
 
-    # Compare models
     compare_models(X_train, y_train)
 
-    # Train best model (Random Forest)
     model = train_random_forest(X_train, y_train)
 
-    # Evaluate
     class_names = list(le.classes_)
     metrics = evaluate_model(model, X_test, y_test, class_names=class_names)
 
-    # Feature importances
     plot_feature_importance(model, feature_names=CLASSIFICATION_FEATURES)
 
-    # Save
     save_model(model)
 
     print("\n[✔] Classification pipeline complete.")

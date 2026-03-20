@@ -16,10 +16,6 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-# ──────────────────────────────────────────────
-# 1. ELBOW METHOD
-# ──────────────────────────────────────────────
-
 def plot_elbow(X: np.ndarray,
                k_range: range = range(2, 11),
                save_path: str = None) -> None:
@@ -46,10 +42,6 @@ def plot_elbow(X: np.ndarray,
     plt.show()
     print(f"[✔] Elbow plot complete.")
 
-
-# ──────────────────────────────────────────────
-# 2. SILHOUETTE ANALYSIS
-# ──────────────────────────────────────────────
 
 def plot_silhouette(X: np.ndarray,
                     k_range: range = range(2, 8),
@@ -83,10 +75,6 @@ def plot_silhouette(X: np.ndarray,
     return best_k
 
 
-# ──────────────────────────────────────────────
-# 3. KMEANS CLUSTERING  ← the main function
-# ──────────────────────────────────────────────
-
 def kmeans_clustering(X: np.ndarray,
                       n_clusters: int = 4,
                       random_state: int = 42) -> tuple:
@@ -118,10 +106,6 @@ def kmeans_clustering(X: np.ndarray,
     print(f"[✔] KMeans fitted  |  K={n_clusters}  |  Silhouette={score:.4f}  |  Inertia={model.inertia_:.2f}")
     return labels, model, score
 
-
-# ──────────────────────────────────────────────
-# 4. HIERARCHICAL CLUSTERING
-# ──────────────────────────────────────────────
 
 def hierarchical_clustering(X: np.ndarray,
                              n_clusters: int = 4,
@@ -176,10 +160,6 @@ def plot_clusters_pca(X: np.ndarray,
     plt.show()
 
 
-# ──────────────────────────────────────────────
-# 6. CLUSTER PROFILE SUMMARY
-# ──────────────────────────────────────────────
-
 def cluster_profile(df: pd.DataFrame,
                     labels: np.ndarray,
                     feature_cols: list = None) -> pd.DataFrame:
@@ -202,10 +182,6 @@ def cluster_profile(df: pd.DataFrame,
     return profile
 
 
-# ──────────────────────────────────────────────
-# 7. GEO PLOT ON WORLD MAP
-# ──────────────────────────────────────────────
-
 def plot_clusters_geo(df: pd.DataFrame,
                       labels: np.ndarray,
                       save_path: str = None) -> None:
@@ -220,7 +196,6 @@ def plot_clusters_geo(df: pd.DataFrame,
 
     plt.figure(figsize=(14, 7))
 
-    # Minimal world-boundary lines
     ax = plt.gca()
     ax.set_facecolor("#e8f4f8")
 
@@ -247,10 +222,6 @@ def plot_clusters_geo(df: pd.DataFrame,
         plt.savefig(save_path, dpi=150)
     plt.show()
 
-
-# ──────────────────────────────────────────────
-# 8. FULL CLUSTERING PIPELINE
-# ──────────────────────────────────────────────
 
 def run_clustering_pipeline(X: np.ndarray,
                              df: pd.DataFrame,

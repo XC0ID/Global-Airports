@@ -11,10 +11,6 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder, MinMaxScaler
 import os
 
 
-# ──────────────────────────────────────────────
-# 1. DATA LOADING
-# ──────────────────────────────────────────────
-
 def load_data(filepath: str = "data/airports.csv") -> pd.DataFrame:
     """Load the airports CSV into a DataFrame."""
     if not os.path.exists(filepath):
@@ -23,10 +19,6 @@ def load_data(filepath: str = "data/airports.csv") -> pd.DataFrame:
     print(f"[✔] Data loaded: {df.shape[0]} rows × {df.shape[1]} columns")
     return df
 
-
-# ──────────────────────────────────────────────
-# 2. DATA INSPECTION
-# ──────────────────────────────────────────────
 
 def inspect_data(df: pd.DataFrame) -> None:
     """Print a quick summary of the dataset."""
@@ -39,10 +31,6 @@ def inspect_data(df: pd.DataFrame) -> None:
     print(df.describe())
 
 
-# ──────────────────────────────────────────────
-# 3. DATA CLEANING
-# ──────────────────────────────────────────────
-
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Clean the raw airport dataframe:
@@ -52,27 +40,22 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     df = df.copy()
 
-    # Remove full duplicates
     before = len(df)
     df.drop_duplicates(inplace=True)
     print(f"[✔] Dropped {before - len(df)} duplicate rows.")
 
-    # Drop rows where essential geo-columns are missing
     df.dropna(subset=["latitude", "longitude", "passengers_millions"], inplace=True)
 
-    # Fill numeric nulls with column median
     num_cols = df.select_dtypes(include=[np.number]).columns
     for col in num_cols:
         if df[col].isnull().sum() > 0:
             df[col].fillna(df[col].median(), inplace=True)
 
-    # Fill categorical nulls with 'Unknown'
     cat_cols = df.select_dtypes(include=["object"]).columns
     for col in cat_cols:
         if df[col].isnull().sum() > 0:
             df[col].fillna("Unknown", inplace=True)
 
-    # Ensure correct dtypes
     df["altitude_ft"] = pd.to_numeric(df["altitude_ft"], errors="coerce").fillna(0)
     df["runways"]     = pd.to_numeric(df["runways"],     errors="coerce").fillna(1).astype(int)
 
@@ -80,40 +63,31 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# ──────────────────────────────────────────────
-# 4. FEATURE ENGINEERING
-# ──────────────────────────────────────────────
-
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     Create new features from existing columns.
     """
     df = df.copy()
 
-    # Altitude category
     df["altitude_category"] = pd.cut(
         df["altitude_ft"],
         bins=[-1, 500, 2000, 5000, 99999],
         labels=["Low", "Medium", "High", "Very High"]
     )
 
-    # Passenger tier
     df["passenger_tier"] = pd.cut(
         df["passengers_millions"],
         bins=[0, 20, 50, 80, 9999],
         labels=["Small", "Medium", "Large", "Mega"]
     )
 
-    # Hemisphere flags
     df["northern_hemisphere"] = (df["latitude"] >= 0).astype(int)
     df["eastern_hemisphere"]  = (df["longitude"] >= 0).astype(int)
 
-    # Runway density (passengers per runway)
     df["passengers_per_runway"] = (
         df["passengers_millions"] / df["runways"].replace(0, 1)
     ).round(2)
 
-    # Region derived from timezone
     def extract_region(tz: str) -> str:
         tz = str(tz)
         if "America" in tz:   return "Americas"
@@ -129,10 +103,6 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-# ──────────────────────────────────────────────
-# 5. ENCODING
-# ──────────────────────────────────────────────
-
 def encode_features(df: pd.DataFrame) -> pd.DataFrame:
     """Label-encode all object / category columns."""
     df = df.copy()
@@ -145,10 +115,6 @@ def encode_features(df: pd.DataFrame) -> pd.DataFrame:
     print(f"[✔] Encoded {len(cat_cols)} categorical columns.")
     return df
 
-
-# ──────────────────────────────────────────────
-# 6. SCALING
-# ──────────────────────────────────────────────
 
 CLUSTER_FEATURES = [
     "latitude", "longitude", "altitude_ft",
@@ -185,10 +151,6 @@ def scale_features(df: pd.DataFrame,
     return X_scaled, scaler
 
 
-# ──────────────────────────────────────────────
-# 7. TRAIN / TEST SPLIT PREP
-# ──────────────────────────────────────────────
-
 def prepare_classification_data(df: pd.DataFrame) -> tuple:
     """
     Prepare X and y for the classification task.
@@ -211,10 +173,6 @@ def prepare_classification_data(df: pd.DataFrame) -> tuple:
     print(f"[✔] Train size: {X_train_s.shape}  |  Test size: {X_test_s.shape}")
     return X_train_s, X_test_s, y_train, y_test, scaler, le
 
-
-# ──────────────────────────────────────────────
-# 8. FULL PIPELINE
-# ──────────────────────────────────────────────
 
 def run_preprocessing_pipeline(filepath: str = "data/airports.csv") -> pd.DataFrame:
     """End-to-end preprocessing pipeline."""
