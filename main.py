@@ -1,7 +1,6 @@
 from src.preprocessing import preprocess_pipeline
+from src.clustering import kmeans_clustering
 from src.classification import train_model, save_model
-from src.clustering import run_kmeans
-
 
 def main():
     path = "data/airports.csv"
@@ -11,7 +10,7 @@ def main():
     model = train_model(df)
     save_model(model, "models/airport_classifier.pkl")
 
-    df, _ = run_kmeans(df, 3)
+    df, _ = kmeans_clustering(df, 3)
 
     print("Pipeline completed successfully!")
 
