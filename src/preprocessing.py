@@ -155,15 +155,31 @@ def prepare_classification_data(df: pd.DataFrame) -> tuple:
     """
     Prepare X and y for the classification task.
     Target: hub_type  (International / Regional / Domestic)
+
+    Note: stratify is only used when every class has >= 2 members.
+    Classes with only 1 member are merged into 'Regional' to avoid
+    the train_test_split ValueError.
     """
     from sklearn.model_selection import train_test_split
 
+    hub = df["hub_type"].astype(str)
+    counts = hub.value_counts()
+    rare   = counts[counts < 2].index.tolist()
+    if rare:
+        print(f"[!] Rare classes merged into 'Regional': {rare}")
+        hub = hub.replace({r: "Regional" for r in rare})
+
     le = LabelEncoder()
-    y = le.fit_transform(df["hub_type"].astype(str))
-    X = df[CLASSIFICATION_FEATURES].fillna(0)
+    y  = le.fit_transform(hub)
+    X  = df[CLASSIFICATION_FEATURES].fillna(0)
+
+    min_class_count = np.bincount(y).min()
+    use_stratify    = y if min_class_count >= 2 else None
+    if use_stratify is None:
+        print("[!] Stratify disabled — a class still has < 2 members.")
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
+        X, y, test_size=0.2, random_state=42, stratify=use_stratify
     )
 
     scaler = StandardScaler()
